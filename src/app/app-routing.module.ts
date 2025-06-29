@@ -20,14 +20,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule {
-  private apiKey = '04620b871e7f679629f8c7707d051cc6';
-
-  constructor(
-    private http: HttpClient
-  ){}
-
-  getWeatherData(cityName: string): Observable<any>{
-    return this.http.get(`https://api.openweatgermap.org/data/2.5/weather?q=${cityName}&units=metric&mode=json&appid=${this.apiKey}`);
-  }
-}
+export class AppRoutingModule {}
