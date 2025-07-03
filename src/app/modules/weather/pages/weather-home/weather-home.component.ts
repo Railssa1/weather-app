@@ -1,20 +1,47 @@
-import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { WeatherService } from '../../services/weather.service';
+import { WeatherData } from 'src/app/models/interface/weather';
+import { Subject, takeUntil } from 'rxjs';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-weather-home',
   templateUrl: './weather-home.component.html',
   styleUrls: []
 })
-export class WeatherHomeComponent {
-   private apiKey = '04620b871e7f679629f8c7707d051cc6';
+export class WeatherHomeComponent implements OnInit, OnDestroy {
+  private readonly destroy$: Subject<void> = new Subject();
+  cityName = 'São Paulo';
+  weatherData!: WeatherData;
+  searchIcon = faMagnifyingGlass;
 
   constructor(
-    private http: HttpClient
+    private weatherService: WeatherService
   ) { }
 
-  getWeatherData(cityName: string): Observable<any> {
-    return this.http.get(`https://api.openweatgermap.org/data/2.5/weather?q=${cityName}&units=metric&mode=json&appid=${this.apiKey}`);
+  ngOnInit(): void {
+      this.getWeatherData(this.cityName);
+  }
+
+  getWeatherData(cityName: string): void {
+    this.weatherService.getWeatherData(cityName)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response) => {
+        this.weatherData = response;
+        console.log(this.weatherData);
+      },
+      error: (err) => console.log(err)
+    })
+  }
+
+  onSubmit(): void {
+    this.getWeatherData(this.cityName);
+    this.cityName = '';
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
